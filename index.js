@@ -2,6 +2,7 @@ const express = require('express')
 const logger = require('morgan');
 const app = express()
 
+// Data In-memory
 let  persons = [
   { 
     "id": 1,
@@ -26,6 +27,7 @@ let  persons = [
 ]
 
 // Middlewares
+app.use(express.static('build'))
 app.use(express.json())
 app.use(logger((tokens, req, res) => {
   let logData = [
@@ -40,10 +42,12 @@ app.use(logger((tokens, req, res) => {
   return logData.join(' ')
 }))
 
+// Helper functions
 const generateId = () => {
   return Math.random()
 }
 
+// Endpoints
 app.get('/info', (request, response) => {
   const date = new Date()
   response.send(
@@ -86,8 +90,7 @@ app.post('/api/persons', (req, resp) => {
   resp.status(409).json({error: 'Name must be unique.'})
 })
 
-
-
+// Server starting point
 const PORT = process.env.PORT || 3001 
 app.listen(PORT, () => {
   console.log(`Express backend started at port ${PORT}`);
