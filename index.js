@@ -1,4 +1,5 @@
 const express = require('express')
+const logger = require('morgan');
 const app = express()
 
 let  persons = [
@@ -24,8 +25,20 @@ let  persons = [
   }
 ]
 
-
+// Middlewares
 app.use(express.json())
+app.use(logger((tokens, req, res) => {
+  let logData = [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ]
+  if(req.method === 'POST')
+  logData = logData.concat(JSON.stringify(req.body))
+  return logData.join(' ')
+}))
 
 const generateId = () => {
   return Math.random()
