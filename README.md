@@ -1,4 +1,4 @@
-# Deploy address
+# Deployed address
 
 https://fathomless-caverns-24583.herokuapp.com
 
