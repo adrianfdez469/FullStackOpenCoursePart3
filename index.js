@@ -84,7 +84,7 @@ app.get('/api/persons/:id', (req, resp) => {
   })
   .catch(err => {
     console.log(err);
-    resp.status(404).end()
+    resp.status(500).end()
   })
 })
 
