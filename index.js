@@ -85,7 +85,7 @@ app.post('/api/persons', (req, resp, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-  PersonModel.findByIdAndUpdate(request.params.id, request.body, {new: true})
+  PersonModel.findByIdAndUpdate(request.params.id, request.body, {new: true, runValidators: true, context: 'query'})
     .then(newP => {
       response.status(200).json(newP)
     })
@@ -95,7 +95,9 @@ app.put('/api/persons/:id', (request, response, next) => {
 const errorHandler = (error, request, response, next) => {
   console.log(error);
   if(error.name === 'CastError'){
-    response.status(400).send({error: 'malformetted id'});
+    return response.status(400).send({error: 'malformetted id'});
+  } else if(error.name === 'ValidationError'){
+    return response.status(400).json({error: error.message})
   }
   next(error);
 }
