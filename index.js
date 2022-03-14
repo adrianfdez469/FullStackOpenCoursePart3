@@ -1,9 +1,12 @@
-const express = require('express')
+const express = require('express');
 const logger = require('morgan');
-const app = express()
+require('dotenv').config();
+
+const app = express();
+const PersonModel = require('./models/person');
 
 // Data In-memory
-let  persons = [
+/*let  persons = [
   { 
     "id": 1,
     "name": "Arto Hellas", 
@@ -24,7 +27,7 @@ let  persons = [
     "name": "Mary Poppendieck", 
     "number": "39-23-6423122"
   }
-]
+]*/
 
 // Middlewares
 app.use(express.static('build'))
@@ -49,26 +52,40 @@ const generateId = () => {
 
 // Endpoints
 app.get('/info', (request, response) => {
-  const date = new Date()
-  response.send(
-    `
-    <p>Phonebook has info for ${persons.length} peoples</p>
-    <p>${date.toString()}</p>
-    `
-  )
+    PersonModel.countDocuments((error, result) => {
+      if(error){
+        console.log(error);
+      }else{
+        const date = new Date()
+        response.send(
+          `
+          <p>Phonebook has info for ${result} peoples</p>
+          <p>${date.toString()}</p>
+          `
+        );
+      }
+    })
 })
 
 app.get('/api/persons', (req, resp) => {
-  resp.json(persons)
+  PersonModel.find({})
+    .then(persons => {
+      resp.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (req, resp) => {
   const id = Number(req.params.id)
-  const person = persons.find(per => per.id === id)
-  if(person){
-    return resp.json(person)
-  }
-  resp.status(404).end()
+  PersonModel.findById(req.params.id).then(person => {
+    if(person){
+      return resp.json(person)
+    }
+    resp.status(404).end()
+  })
+  .catch(err => {
+    console.log(err);
+    resp.status(404).end()
+  })
 })
 
 app.delete('/api/persons/:id', (req, resp) => {
@@ -81,13 +98,15 @@ app.post('/api/persons', (req, resp) => {
   if(!req.body.name || !req.body.number){
     return resp.status(400).json({error: 'Name and number are mandatory.'});
   }
-  const id = generateId()
-  const newPerson = {...req.body, id}
-  if(!persons.find(p => p.name === newPerson.name)){
-    persons = persons.concat(newPerson);
-    return resp.status(201).json(newPerson)
-  }
-  resp.status(409).json({error: 'Name must be unique.'})
+  
+  const person = new PersonModel({...req.body})
+  person.save()
+    .then(p => {
+      resp.status(201).json(p);
+    })
+    .catch(err => {
+      resp.status(500).json({error: 'Something went wrong. Try later pleace.'})
+    })
 })
 
 // Server starting point

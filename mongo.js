@@ -1,12 +1,10 @@
 const monngose = require('mongoose');
 
-
 if (process.argv.length !== 3 && process.argv.length !== 5) {
   console.log('To insert on the phonebook: node mongo.js <YOURPASSWORD> <PERSON_NAME> <PERSON_PHONE>');
   console.log('To list the phonebook: node mongo.js <YOURPASSWORD>');
   process.exit(1)
 }
-
 
 //const password = process.argv[2];
 const [
